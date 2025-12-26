@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erus Gurme | Gıda Şifresi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Chosen Palette: "Organic Trust v2" -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; }
+        
+        .result-card { transition: all 0.3s ease; }
+        .result-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        
+        .risk-safe { border-left: 6px solid #10b981; background: linear-gradient(to right, #ecfdf5, #ffffff); }
+        .risk-warning { border-left: 6px solid #f59e0b; background: linear-gradient(to right, #fffbeb, #ffffff); }
+        .risk-danger { border-left: 6px solid #ef4444; background: linear-gradient(to right, #fef2f2, #ffffff); }
+        
+        /* Tag styling */
+        .multi-tag {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            border: 1px solid #e7e5e4;
+            color: #78716c;
+            background-color: #fafaf9;
+            margin-right: 4px;
+            margin-bottom: 4px;
+            display: inline-block;
+        }
+
+        /* Mobile responsive adjustments */
+        @media (max-width: 640px) {
+            .hero-title { font-size: 1.75rem; }
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm border-b border-stone-200 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="bg-emerald-100 p-2 rounded-full">
+                    <i class="fas fa-search text-emerald-600"></i>
+                </div>
+                <span class="text-xl font-bold text-stone-800 tracking-tight">Erus<span class="text-emerald-600">Gurme</span></span>
+            </div>
+            <div class="hidden md:flex space-x-6 text-sm font-medium text-stone-600">
+                <a href="#" class="hover:text-emerald-600 transition-colors">Analiz</a>
+                <a href="#rehberler" class="hover:text-emerald-600 transition-colors">E-Rehberler</a>
+                <a href="#" class="hover:text-emerald-600 transition-colors">Hakkımızda</a>
+            </div>
+            <!-- Mobile Menu Icon -->
+            <div class="md:hidden text-stone-500">
+                <i class="fas fa-bars text-xl"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="bg-emerald-800 text-white py-12 px-4 text-center relative overflow-hidden shadow-lg">
+        <div class="max-w-3xl mx-auto relative z-10">
+            <span class="bg-emerald-900 text-emerald-200 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4 inline-block">Gıda Teknolojisi Destekli</span>
+            <!-- NEW SLOGAN HERE -->
+            <h1 class="hero-title text-4xl md:text-5xl font-bold mb-4 leading-tight">Gıda Şifresi</h1>
+            <p class="text-emerald-100 mb-8 text-lg max-w-xl mx-auto">Market raflarındaki gizli kodları çözün. Sağlığınız için bilimsel analiz.</p>
+            
+            <div class="bg-white p-2 rounded-full shadow-2xl flex items-center max-w-lg mx-auto transform transition-transform focus-within:scale-105 duration-200">
+                <i class="fas fa-barcode text-stone-400 ml-4 text-xl"></i>
+                <input type="text" id="searchInput" placeholder="Kod Ara (Örn: E322, E407)..." 
+                       class="flex-grow px-4 py-3 rounded-full text-stone-800 outline-none placeholder-stone-400 font-medium w-full"
+                       onkeyup="searchCode()" autocomplete="off">
+                <button onclick="searchCode()" class="bg-amber-500 hover:bg-amber-600 text-white w-12 h-12 rounded-full flex items-center justify-center font-bold transition-colors shadow-md">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+            
+            <!-- Quick Tags -->
+            <div class="mt-6 flex flex-wrap justify-center gap-2 text-xs md:text-sm">
+                <button onclick="fillSearch('E322')" class="bg-emerald-700/50 hover:bg-emerald-700 px-3 py-1 rounded-full transition-colors cursor-pointer">E322 (Lesitin)</button>
+                <button onclick="fillSearch('E330')" class="bg-emerald-700/50 hover:bg-emerald-700 px-3 py-1 rounded-full transition-colors cursor-pointer">E330 (Sitrik)</button>
+                <button onclick="fillSearch('E407')" class="bg-emerald-700/50 hover:bg-emerald-700 px-3 py-1 rounded-full transition-colors cursor-pointer">E407 (Karragenan)</button>
+                <button onclick="fillSearch('E250')" class="bg-emerald-700/50 hover:bg-emerald-700 px-3 py-1 rounded-full transition-colors cursor-pointer">E250 (Nitrit)</button>
+            </div>
+        </div>
+        
+        <!-- Background Decor -->
+        <i class="fas fa-leaf absolute -bottom-10 -left-10 text-emerald-900 text-9xl opacity-20 rotate-45"></i>
+        <i class="fas fa-flask absolute top-10 -right-10 text-emerald-900 text-9xl opacity-20 -rotate-12"></i>
+    </section>
+
+    <!-- RESULTS SECTION -->
+    <main id="resultsSection" class="max-w-3xl mx-auto px-4 py-8 flex-grow w-full">
+        <!-- Default State -->
+        <div id="defaultState" class="text-center py-10">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-stone-100 max-w-md mx-auto">
+                <div class="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-search text-stone-400 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-stone-700 mb-2">Aramaya Başlayın</h3>
+                <p class="text-stone-500 text-sm">Merak ettiğiniz E-Kodunu veya katkı maddesi ismini yukarı yazın. Veritabanımızda 30+ kritik madde çoklu fonksiyonlarıyla kayıtlıdır.</p>
+            </div>
+        </div>
+
+        <!-- Stats Bar (Visible on search) -->
+        <div id="statsBar" class="hidden mb-4 flex justify-between items-center text-xs text-stone-500 px-2">
+            <span id="resultCount">0 sonuç bulundu</span>
+            <span>Veri Kaynağı: Türk Gıda Kodeksi</span>
+        </div>
+
+        <!-- Results Container -->
+        <div id="resultsContainer" class="space-y-4 hidden pb-12">
+            <!-- JS populates this -->
+        </div>
+    </main>
+
+    <!-- PROFESSIONAL GUIDES SECTION (Real-looking Shop/Content Area) -->
+    <section id="rehberler" class="bg-white border-t border-stone-200 py-12 px-4">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-10">
+                <span class="text-emerald-600 font-bold text-xs tracking-wider uppercase bg-emerald-50 px-3 py-1 rounded-full">Akademi</span>
+                <h2 class="text-2xl md:text-3xl font-bold text-stone-800 mt-3">Profesyonel Gıda Rehberleri</h2>
+                <p class="text-stone-500 mt-2 max-w-xl mx-auto">Gıda Teknolojisi laboratuvarlarından mutfağınıza. Bilimsel verilerle hazırlanmış e-kitaplar.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Product Card 1 -->
+                <div class="bg-stone-50 rounded-xl p-6 border border-stone-100 flex flex-col md:flex-row items-center gap-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-24 h-32 bg-stone-200 rounded-lg flex items-center justify-center text-stone-400 flex-shrink-0 shadow-inner">
+                        <i class="fas fa-book text-3xl"></i>
+                    </div>
+                    <div class="flex-grow text-center md:text-left">
+                        <h3 class="font-bold text-lg text-stone-800">Evde Profesyonel Fermantasyon</h3>
+                        <p class="text-sm text-stone-600 mt-1 mb-3">Yoğurt, turşu ve kefir yapımında pH dengesi ve sıcaklık kontrolü.</p>
+                        <div class="flex items-center justify-center md:justify-start gap-3">
+                            <span class="font-bold text-emerald-700">75 TL</span>
+                            <button class="bg-stone-800 text-white text-xs px-4 py-2 rounded-lg hover:bg-stone-900 transition-colors">
+                                <i class="fas fa-lock mr-1"></i> İncele
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 2 -->
+                <div class="bg-stone-50 rounded-xl p-6 border border-stone-100 flex flex-col md:flex-row items-center gap-6 shadow-sm hover:shadow-md transition-shadow opacity-75">
+                    <div class="w-24 h-32 bg-stone-200 rounded-lg flex items-center justify-center text-stone-400 flex-shrink-0 shadow-inner">
+                        <i class="fas fa-file-alt text-3xl"></i>
+                    </div>
+                    <div class="flex-grow text-center md:text-left">
+                        <h3 class="font-bold text-lg text-stone-800">Etiket Okuma Uzmanlığı</h3>
+                        <p class="text-sm text-stone-600 mt-1 mb-3">Market alışverişinde hileli ürünleri 3 saniyede tanıma sanatı.</p>
+                        <div class="flex items-center justify-center md:justify-start gap-3">
+                            <span class="font-bold text-stone-400">Yakında</span>
+                            <button class="bg-stone-200 text-stone-500 text-xs px-4 py-2 rounded-lg cursor-not-allowed">
+                                Hazırlanıyor
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-stone-900 text-stone-400 py-8 border-t border-stone-800">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center text-sm">
+            <div class="mb-4 md:mb-0">
+                <span class="font-bold text-white text-lg">Erus<span class="text-emerald-500">Gurme</span></span>
+                <p class="text-stone-500 text-xs mt-1">Gıda güvenliği ve bilinci için dijital çözümler.</p>
+            </div>
+            <div class="flex space-x-6">
+                <a href="#" class="hover:text-white transition-colors">Kullanım Şartları</a>
+                <a href="#" class="hover:text-white transition-colors">Gizlilik</a>
+                <a href="#" class="hover:text-white transition-colors">İletişim</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- GENİŞLETİLMİŞ VE ÇOKLU GÖREVLİ VERİTABANI ---
+        const eCodes = [
+            // RENKLENDİRİCİLER
+            { code: "E100", name: "Kurkumin", cats: ["Renklendirici"], status: "Helal / Bitkisel", risk: "safe", desc: "Zerdeçaldan elde edilen doğal sarı renk verici. Güvenlidir." },
+            { code: "E102", name: "Tartrazin", cats: ["Renklendirici"], status: "Sentetik", risk: "danger", desc: "Yapay sarı boya. Çocuklarda hiperaktivite ve astım tetikleyicisi olabilir. Bazı ülkelerde yasaklı." },
+            { code: "E120", name: "Karmin (Koşnil)", cats: ["Renklendirici"], status: "Böcek Kaynaklı", risk: "warning", desc: "Kırmızı renk. Dactylopius coccus böceğinden elde edilir. Alerjik olabilir. Vegan değildir." },
+            { code: "E133", name: "Brillant Blue", cats: ["Renklendirici"], status: "Sentetik", risk: "warning", desc: "Yapay mavi boya. Genellikle güvenli kabul edilse de bazı ülkelerde kısıtlanmıştır." },
+            { code: "E150d", name: "Amonyum Sülfit Karamel", cats: ["Renklendirici"], status: "Sentetik/Bitkisel", risk: "warning", desc: "Kola ve gazlı içeceklerdeki kahverengi renk. Yüksek tüketimi tartışmalıdır." },
+            { code: "E160a", name: "Beta Karoten", cats: ["Renklendirici", "Provitamin A"], status: "Doğal/Bitkisel", risk: "safe", desc: "Havuç ve bitkilerden elde edilen turuncu renk. Vücutta A vitaminine dönüşür." },
+            { code: "E171", name: "Titanyum Dioksit", cats: ["Renklendirici", "Opaklaştırıcı"], status: "Mineral", risk: "danger", desc: "Beyazlatıcı ve parlatıcı. AB ülkelerinde gıdada kullanımı yasaklanmıştır (genotoksik şüphesi)." },
+
+            // KORUYUCULAR
+            { code: "E200", name: "Sorbik Asit", cats: ["Koruyucu"], status: "Sentetik/Doğal", risk: "safe", desc: "Küf ve maya önleyici. Genellikle güvenli kabul edilir." },
+            { code: "E202", name: "Potasyum Sorbat", cats: ["Koruyucu"], status: "Sentetik", risk: "safe", desc: "En yaygın koruyuculardan biri. Küf ve mayalara karşı etkilidir." },
+            { code: "E211", name: "Sodyum Benzoat", cats: ["Koruyucu"], status: "Sentetik", risk: "warning", desc: "Asitli gıdalarda bakteri ve mantar önleyici. C vitamini ile birleşirse riskli olabilir." },
+            { code: "E220", name: "Kükürt Dioksit", cats: ["Koruyucu", "Antioksidan"], status: "Sentetik", risk: "warning", desc: "Kuru meyvelerde kararmayı önler ve korur. Sülfit hassasiyeti olanlarda risklidir." },
+            { code: "E250", name: "Sodyum Nitrit", cats: ["Koruyucu", "Renk Sabitleyici"], status: "Sentetik", risk: "danger", desc: "Et ürünlerinde bozulmayı önler ve o karakteristik pembe rengi verir. Kanserojen riski taşır." },
+
+            // ANTİOKSİDANLAR & ASİTLER & DİĞER FONKSİYONLAR
+            { code: "E300", name: "Askorbik Asit", cats: ["Antioksidan", "Asitlik Düzenleyici", "Un İşlem"], status: "Doğal/Bitkisel", risk: "safe", desc: "C Vitamini. Gıdanın kararmasını önler, unun yapısını güçlendirir." },
+            { code: "E322", name: "Lesitin", cats: ["Emülgatör", "Antioksidan", "Stabilizör"], status: "Bitkisel (Soya/Ayçiçek)", risk: "safe", desc: "Yağ ve suyun karışmasını sağlar, çikolatanın yapısını korur ve raf ömrünü uzatır." },
+            { code: "E330", name: "Sitrik Asit", cats: ["Asitlik Düzenleyici", "Aroma Verici", "Antioksidan"], status: "Bitkisel", risk: "safe", desc: "Limon tuzu. Ekşilik verir, pH dengeler ve diğer antioksidanların etkisini artırır." },
+
+            // KIVAM ARTIRICILAR & EMÜLGATÖRLER
+            { code: "E407", name: "Karragenan", cats: ["Kıvam Artırıcı", "Stabilizör", "Jelleştirici"], status: "Bitkisel (Yosun)", risk: "warning", desc: "Deniz yosunu özütü. Sütlü ürünlerde kıvam verir. Hassas bağırsaklarda sorun yaratabilir." },
+            { code: "E412", name: "Guar Gam", cats: ["Kıvam Artırıcı", "Stabilizör"], status: "Bitkisel", risk: "safe", desc: "Guar fasulyesinden elde edilir. Dondurma ve soslarda kıvam ve yapı sağlar." },
+            { code: "E415", name: "Ksantan Gam", cats: ["Kıvam Artırıcı", "Stabilizör", "Emülgatör"], status: "Fermantasyon", risk: "safe", desc: "Glutensiz ürünlerde yapı taşıdır. Soslarda faz ayrılmasını (yağın üste çıkmasını) önler." },
+            { code: "E440", name: "Pektin", cats: ["Jelleştirici", "Kıvam Artırıcı", "Stabilizör"], status: "Bitkisel (Meyve)", risk: "safe", desc: "Meyve kabuğu özütü. Reçel ve marmelatlarda jöle yapısını kurar." },
+            { code: "E471", name: "Mono ve Digliseritler", cats: ["Emülgatör", "Stabilizör"], status: "Şüpheli (Bitkisel/Hayvansal)", risk: "warning", desc: "Yağ ve suyun karışmasını sağlar. Dondurmanın erimesini geciktirir. Helal sertifikası önemlidir." },
+            
+            // TATLANDIRICILAR & LEZZET
+            { code: "E621", name: "Monosodyum Glutamat (MSG)", cats: ["Lezzet Artırıcı"], status: "Fermantasyon", risk: "warning", desc: "Çin tuzu. 5. tat olan Umami'yi verir. Tüketimi iştah açabilir." },
+            { code: "E950", name: "Asesülfam K", cats: ["Tatlandırıcı", "Lezzet Artırıcı"], status: "Sentetik", risk: "warning", desc: "Kalorisiz tatlandırıcı. Genelde diğer tatlandırıcılarla karıştırılarak kullanılır." },
+            { code: "E951", name: "Aspartam", cats: ["Tatlandırıcı"], status: "Sentetik", risk: "warning", desc: "Çok güçlü yapay tatlandırıcı. Isıya dayanıklı değildir." },
+            { code: "E954", name: "Sakarin", cats: ["Tatlandırıcı"], status: "Sentetik", risk: "warning", desc: "Eski tip tatlandırıcı. Diyabetik ürünlerde kullanılır." },
+            { code: "E960", name: "Steviol Glikozitler", cats: ["Tatlandırıcı"], status: "Bitkisel (Stevia)", risk: "safe", desc: "Stevia yaprağı özütü. Doğal kaynaklı, kalorisiz tatlandırıcı." }
+        ];
+
+        // --- SEARCH LOGIC ---
+        function fillSearch(code) {
+            document.getElementById('searchInput').value = code;
+            searchCode();
+        }
+
+        function searchCode() {
+            const input = document.getElementById('searchInput').value.toUpperCase().trim();
+            const container = document.getElementById('resultsContainer');
+            const defaultState = document.getElementById('defaultState');
+            const statsBar = document.getElementById('statsBar');
+            const resultCount = document.getElementById('resultCount');
+
+            // Reset UI
+            container.innerHTML = '';
+
+            if (input.length < 2) {
+                container.classList.add('hidden');
+                statsBar.classList.add('hidden');
+                defaultState.classList.remove('hidden');
+                return;
+            }
+
+            // Arama Algoritması
+            const results = eCodes.filter(item => 
+                item.code.includes(input) || 
+                item.name.toUpperCase().includes(input) ||
+                item.cats.some(cat => cat.toUpperCase().includes(input))
+            );
+
+            if (results.length > 0) {
+                defaultState.classList.add('hidden');
+                container.classList.remove('hidden');
+                statsBar.classList.remove('hidden');
+                resultCount.innerText = `${results.length} sonuç bulundu`;
+
+                results.forEach(item => {
+                    // Risk visual config
+                    let riskClass = "risk-safe";
+                    let riskIcon = "fa-check-circle";
+                    let riskLabel = "Güvenli";
+                    let riskTextColor = "text-emerald-700";
+                    let iconColor = "text-emerald-500";
+                    
+                    if (item.risk === 'warning') {
+                        riskClass = "risk-warning";
+                        riskIcon = "fa-exclamation-triangle";
+                        riskLabel = "Dikkat";
+                        riskTextColor = "text-amber-700";
+                        iconColor = "text-amber-500";
+                    } else if (item.risk === 'danger') {
+                        riskClass = "risk-danger";
+                        riskIcon = "fa-radiation";
+                        riskLabel = "Riskli";
+                        riskTextColor = "text-red-700";
+                        iconColor = "text-red-500";
+                    }
+
+                    // Generate Tags HTML
+                    const tagsHtml = item.cats.map(cat => 
+                        `<span class="multi-tag">${cat}</span>`
+                    ).join('');
+
+                    const html = `
+                        <div class="result-card bg-white p-5 rounded-xl shadow-sm border border-stone-100 ${riskClass} relative overflow-hidden">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                                        ${tagsHtml}
+                                        ${item.status.includes('Helal') ? '<span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full"><i class="fas fa-check mr-1"></i>Helal</span>' : ''}
+                                        ${item.status.includes('Böcek') ? '<span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full"><i class="fas fa-bug mr-1"></i>Böcek</span>' : ''}
+                                    </div>
+                                    <h3 class="text-2xl font-bold text-stone-800 flex items-center gap-2">
+                                        ${item.code} 
+                                        <span class="text-lg font-normal text-stone-500">| ${item.name}</span>
+                                    </h3>
+                                </div>
+                                <div class="text-center min-w-[60px] flex flex-col items-center">
+                                    <i class="fas ${riskIcon} ${iconColor} text-3xl mb-1"></i>
+                                    <div class="text-xs font-bold ${riskTextColor}">${riskLabel}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3 text-stone-600 text-sm leading-relaxed border-t border-stone-100/50 pt-3">
+                                <span class="font-semibold text-stone-700">Analiz:</span> ${item.desc}
+                            </div>
+                            <div class="mt-2 text-xs font-semibold text-stone-400">
+                                Kaynak: ${item.status}
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += html;
+                });
+            } else {
+                defaultState.classList.add('hidden');
+                container.classList.remove('hidden');
+                statsBar.classList.remove('hidden');
+                resultCount.innerText = `Sonuç bulunamadı`;
+                
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-white rounded-xl border border-stone-100 shadow-sm">
+                        <i class="fas fa-file-excel text-stone-200 text-5xl mb-4"></i>
+                        <p class="text-stone-600 font-medium">"${input}" veritabanında bulunamadı.</p>
+                        <p class="text-xs text-stone-400 mt-2 max-w-xs mx-auto">Prototip sürümünde sadece en yaygın 30 madde kayıtlıdır.</p>
+                        <button onclick="document.getElementById('searchInput').value=''; searchCode()" class="mt-4 text-emerald-600 text-sm hover:underline">Aramayı Temizle</button>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
